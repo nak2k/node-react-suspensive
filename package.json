@@ -1,6 +1,6 @@
 {
   "name": "react-suspensive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Promise wrapper for render-as-you-fetch",
   "author": "Kengo Nakatsuka <kengo.nakatsuka@gmail.com>",
   "bugs": {
