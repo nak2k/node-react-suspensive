@@ -36,6 +36,52 @@ function Resource(props: { resource: Suspensive<Resource>}) {
 }
 ```
 
+`Wait` waits `Suspensive` value with using `Suspense`, and render the resolved value.
+
+After `Suspensive` is resolved, the `render` prop is called with the resolved value.
+While waiting, it shows the `fallback` prop.
+
+```
+import { Suspensive, Wait } from 'react-suspensive';
+
+const value = new Suspensive(fetch(...));
+
+<Wait suspensive={value}
+  fallback={<div>Loading...</div>}
+  render={value =>
+    <MyComponent value={value} />
+  } />
+```
+
+If the `fallback` prop omits, the default value, which can be set using
+`setDefaultFallback()`, will be used.
+
+```
+import { Suspensive, Wait, setDefaultFallback } from 'react-suspensive';
+
+setDefaultFallback(<MyLoading />);
+
+const value = new Suspensive(fetch(...));
+
+<Wait suspensive={value} render={value =>
+  <MyComponent value={value} />
+} />
+```
+
+The `renderAlways` prop can be used instead of `render` and `fallback` props.
+It renders contents based on waiting status and the resolved value.
+
+```
+import { Suspensive, Wait } from 'react-suspensive';
+
+const value = new Suspensive(fetch(...));
+
+<Wait suspensive={value} renderAlways={(waiting, value) =>
+  <Button onClick={reload} disabled={waiting}>Reload</Button>
+  { waiting || <MyComponent value={value} /> }
+} />
+```
+
 ## License
 
 MIT

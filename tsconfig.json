@@ -18,7 +18,9 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSourceMap": false,
     "inlineSources": false,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react"
   },
   "include": [
     "src/**/*.ts"
