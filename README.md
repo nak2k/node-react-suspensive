@@ -41,7 +41,7 @@ function Resource(props: { resource: Suspensive<Resource>}) {
 After `Suspensive` is resolved, the `render` prop is called with the resolved value.
 While waiting, it shows the `fallback` prop.
 
-```
+``` typescript
 import { Suspensive, Wait } from 'react-suspensive';
 
 const value = new Suspensive(fetch(...));
@@ -56,7 +56,7 @@ const value = new Suspensive(fetch(...));
 If the `fallback` prop omits, the default value, which can be set using
 `setDefaultFallback()`, will be used.
 
-```
+``` typescript
 import { Suspensive, Wait, setDefaultFallback } from 'react-suspensive';
 
 setDefaultFallback(<MyLoading />);
@@ -71,7 +71,7 @@ const value = new Suspensive(fetch(...));
 The `renderAlways` prop can be used instead of `render` and `fallback` props.
 It renders contents based on waiting status and the resolved value.
 
-```
+``` typescript
 import { Suspensive, Wait } from 'react-suspensive';
 
 const value = new Suspensive(fetch(...));
