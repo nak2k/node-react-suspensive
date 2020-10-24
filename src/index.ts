@@ -1,14 +1,22 @@
 /**
  * Promise wrapper for render-as-you-fetch.
- * 
+ *
  * ```typescript
- * const resource = new Suspensive(fetch(...));
- * 
- * return (
- *   <Suspense fallback={<Loading />}>
- *     { resource.value }
- *   </Suspense>
- * );
+ * function ResourceWithLoading() {
+ *   const resource = new Suspensive(fetch(...));
+ *
+ *   return (
+ *     <Suspense fallback={<Loading />}>
+ *       <Resource resource={resource} />
+ *     </Suspense>
+ *   );
+ * }
+ *
+ * function Resource(props: { resource: Suspensive<Resource>}) {
+ *   // If the value not prepared, throw an exception at the following line.
+ *   const resource = props.resource.value;
+ *   ...
+ * }
  * ```
  */
 export class Suspensive<T> {
