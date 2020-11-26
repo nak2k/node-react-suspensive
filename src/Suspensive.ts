@@ -22,13 +22,22 @@
 export class Suspensive<T> {
   protected _get: () => T;
 
-  constructor(promise: Promise<T>) {
-    this._get = () => { throw promise };
+  constructor(promise: Promise<T> | (() => Promise<T>)) {
+    if (typeof promise === 'function') {
+      this._get = () => {
+        throw promise().then(
+          value => this._get = () => value,
+          reason => this._get = () => { throw reason }
+        );
+      };
+    } else {
+      this._get = () => { throw promise };
 
-    promise.then(
-      value => this._get = () => value,
-      reason => this._get = () => { throw reason }
-    );
+      promise.then(
+        value => this._get = () => value,
+        reason => this._get = () => { throw reason }
+      );
+    }
   }
 
   get value() {
