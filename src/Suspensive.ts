@@ -20,7 +20,7 @@
  * ```
  */
 export class Suspensive<T> {
-  private _get: () => T;
+  protected _get: () => T;
 
   constructor(promise: Promise<T>) {
     this._get = () => { throw promise };
