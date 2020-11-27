@@ -20,7 +20,7 @@
  * ```
  */
 export class Suspensive<T> {
-  protected _get: () => T;
+  private _get: () => T;
 
   constructor(promise: Promise<T> | (() => Promise<T>)) {
     if (typeof promise === 'function') {
