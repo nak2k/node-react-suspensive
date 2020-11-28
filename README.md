@@ -209,6 +209,10 @@ const suspensive = new Suspensive(fetchMyResrouce);
 } />
 ```
 
+## Examples
+
+- [counter](examples/counter)
+
 ## License
 
 MIT
