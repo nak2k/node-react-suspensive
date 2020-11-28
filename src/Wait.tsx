@@ -1,4 +1,5 @@
 import React, { ReactNode, Suspense, SuspenseProps } from 'react';
+import { useObserver } from './Observer';
 import { Suspensive } from './Suspensive';
 
 type FallbackProp = SuspenseProps['fallback'];
@@ -63,6 +64,8 @@ export function setDefaultFallback(node: FallbackProp) {
  * ```
  */
 export function Wait<T>(props: WaitProps<T>) {
+  useObserver(props.suspensive);
+
   return 'renderAlways' in props
     ? <Suspense
       fallback={<RenderAlways waiting {...props} />}
@@ -76,9 +79,9 @@ function Render<T>({ suspensive, render }: RenderProps<T>) {
   return <>{render(suspensive.value)}</>;
 }
 
-function RenderAlways<T>(props: RenderAlwaysProps<T>) {
-  return <>{props.waiting
-    ? props.renderAlways(true, undefined as any as T)
-    : props.renderAlways(false, props.suspensive.value)
+function RenderAlways<T>({ waiting, renderAlways, suspensive }: RenderAlwaysProps<T>) {
+  return <>{waiting
+    ? renderAlways(true, undefined as any as T)
+    : renderAlways(false, suspensive.value)
   }</>;
 }

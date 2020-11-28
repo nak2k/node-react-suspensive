@@ -1,3 +1,5 @@
+import { Observable, ObserverCallback } from "./Observer";
+
 /**
  * Promise wrapper for render-as-you-fetch.
  *
@@ -19,28 +21,57 @@
  * }
  * ```
  */
-export class Suspensive<T> {
+export class Suspensive<T> implements Observable {
   private _get: () => T;
+  private _observers = new Set<ObserverCallback>();
 
-  constructor(promise: Promise<T> | (() => Promise<T>)) {
-    if (typeof promise === 'function') {
-      this._get = () => {
-        throw promise().then(
-          value => this._get = () => value,
-          reason => this._get = () => { throw reason }
-        );
-      };
-    } else {
-      this._get = () => { throw promise };
+  constructor(promise: T | Promise<T> | (() => Promise<T>)) {
+    this._set(promise);
+  }
+
+  private _set(promise: T | Promise<T> | (() => Promise<T>)) {
+    if (promise instanceof Promise) {
+      this._get = () => { throw promise; };
 
       promise.then(
         value => this._get = () => value,
-        reason => this._get = () => { throw reason }
+        reason => this._get = () => { throw reason; }
       );
+    } else if (promise instanceof Function) {
+      this._get = () => {
+        throw promise().then(
+          value => this._get = () => value,
+          reason => this._get = () => { throw reason; }
+        );
+      };
+    } else {
+      this._get = () => promise;
     }
   }
 
   get value() {
     return this._get();
   }
+
+  set value(value: T) {
+    this.set(value);
+  }
+
+  set(value: T | Promise<T> | (() => Promise<T>)) {
+    this._set(value);
+
+    this._observers.forEach(observer => observer());
+  }
+
+  addObserver(callback: ObserverCallback) {
+    this._observers.add(callback);
+  }
+
+  removeObserver(callback: ObserverCallback) {
+    this._observers.delete(callback);
+  }
+}
+
+export function isSuspensive<T>(obj: any): obj is Suspensive<T> {
+  return obj instanceof Suspensive;
 }
