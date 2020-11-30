@@ -209,6 +209,20 @@ const suspensive = new Suspensive(fetchMyResrouce);
 } />
 ```
 
+If the `transient` attribute is specified, `Wait` renders the previous value until new `Promise` is resolved.
+And arguments of the `render` function is added a boolean value whether this transition is in progress or not.
+
+``` typescript
+<Wait suspensive={suspensive} transient render={(value, pending) =>
+  <>
+    <MyComponent value={value} />
+    <Button disabled={pending} onClick={() => {
+      suspensive.set(fetchMyResource);
+    }}>Reload</Button>
+  </>
+} />
+```
+
 ## Examples
 
 - [counter](examples/counter)

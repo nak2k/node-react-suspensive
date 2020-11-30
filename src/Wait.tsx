@@ -6,22 +6,26 @@ type FallbackProp = SuspenseProps['fallback'];
 
 type WaitProps<T> = {
   suspensive: Suspensive<T>;
-  render: (value: T) => ReactNode;
+  transient?: boolean;
+  render: (value: T, pending?: boolean) => ReactNode;
   fallback?: ReactNode;
 } | {
   suspensive: Suspensive<T>;
-  renderAlways: (waiting: boolean, value: T) => ReactNode;
+  transient?: boolean;
+  renderAlways: (waiting: boolean, value: T, pending?: boolean) => ReactNode;
 };
 
 interface RenderProps<T> {
   suspensive: Suspensive<T>;
-  render: (value: T) => ReactNode;
+  render: (value: T, pending?: boolean) => ReactNode;
+  pending?: boolean;
 }
 
 interface RenderAlwaysProps<T> {
   waiting?: boolean;
   suspensive: Suspensive<T>;
-  renderAlways: (waiting: boolean, value: T) => ReactNode;
+  renderAlways: (waiting: boolean, value: T, pending?: boolean) => ReactNode;
+  pending?: boolean;
 }
 
 let defaultFallback: FallbackProp = 'Loading...';
@@ -64,24 +68,34 @@ export function setDefaultFallback(node: FallbackProp) {
  * ```
  */
 export function Wait<T>(props: WaitProps<T>) {
-  useObserver(props.suspensive);
+  const { suspensive, transient } = props;
 
-  return 'renderAlways' in props
-    ? <Suspense
-      fallback={<RenderAlways waiting {...props} />}
-      children={<RenderAlways {...props} />} />
-    : <Suspense
-      fallback={props.fallback ?? defaultFallback}
-      children={<Render suspensive={props.suspensive} render={props.render} />} />;
+  useObserver(suspensive);
+
+  const pending = transient && suspensive.hasPrev();
+
+  if ('renderAlways' in props) {
+    return <Suspense
+      fallback={<RenderAlways suspensive={suspensive} waiting pending={pending} renderAlways={props.renderAlways} />}
+      children={<RenderAlways suspensive={suspensive} renderAlways={props.renderAlways} />}
+    />;
+  } else {
+    return <Suspense
+      fallback={pending
+        ? <Render suspensive={suspensive} pending render={props.render} />
+        : (props.fallback ?? defaultFallback)}
+      children={<Render suspensive={suspensive} render={props.render} />}
+    />;
+  }
 }
 
-function Render<T>({ suspensive, render }: RenderProps<T>) {
-  return <>{render(suspensive.value)}</>;
+function Render<T>({ suspensive, render, pending }: RenderProps<T>) {
+  return <>{render(pending ? suspensive.prev : suspensive.value, pending)}</>;
 }
 
-function RenderAlways<T>({ waiting, renderAlways, suspensive }: RenderAlwaysProps<T>) {
+function RenderAlways<T>({ waiting, renderAlways, suspensive, pending }: RenderAlwaysProps<T>) {
   return <>{waiting
-    ? renderAlways(true, undefined as any as T)
-    : renderAlways(false, suspensive.value)
+    ? renderAlways(true, undefined as any as T, pending)
+    : renderAlways(false, pending ? suspensive.prev : suspensive.value, pending)
   }</>;
 }

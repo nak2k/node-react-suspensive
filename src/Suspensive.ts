@@ -1,5 +1,7 @@
 import { Observable, ObserverCallback } from "./Observer";
 
+export const NOT_IN_TRANSITION = Symbol('Not in transition');
+
 /**
  * Promise wrapper for render-as-you-fetch.
  *
@@ -23,30 +25,40 @@ import { Observable, ObserverCallback } from "./Observer";
  */
 export class Suspensive<T> implements Observable {
   private _get: () => T;
+  private _prev: T | typeof NOT_IN_TRANSITION;
   private _observers = new Set<ObserverCallback>();
 
   constructor(promise: T | Promise<T> | (() => Promise<T>)) {
+    this._get = () => NOT_IN_TRANSITION as unknown as T;
     this._set(promise);
   }
 
   private _set(promise: T | Promise<T> | (() => Promise<T>)) {
-    if (promise instanceof Promise) {
-      this._get = () => { throw promise; };
+    this._prev = this._get();
 
-      promise.then(
-        value => this._get = () => value,
-        reason => this._get = () => { throw reason; }
-      );
+    if (promise instanceof Promise) {
+      const wrapped = this._wrapPromise(promise);
+      this._get = () => { throw wrapped; };
     } else if (promise instanceof Function) {
       this._get = () => {
-        throw promise().then(
-          value => this._get = () => value,
-          reason => this._get = () => { throw reason; }
-        );
+        throw this._wrapPromise(promise());
       };
     } else {
       this._get = () => promise;
     }
+  }
+
+  private _wrapPromise(promise: Promise<T>) {
+    return promise.then(
+      value => {
+        this._prev = NOT_IN_TRANSITION;
+        this._get = () => value;
+      },
+      reason => {
+        this._prev = NOT_IN_TRANSITION;
+        this._get = () => { throw reason; };
+      }
+    );
   }
 
   get value() {
@@ -61,6 +73,18 @@ export class Suspensive<T> implements Observable {
     this._set(value);
 
     this._observers.forEach(observer => observer());
+  }
+
+  get prev(): T {
+    if (this._prev === NOT_IN_TRANSITION) {
+      throw new Error('The `prev` property can be get only in a transition');
+    }
+
+    return this._prev;
+  }
+
+  hasPrev() {
+    return this._prev !== NOT_IN_TRANSITION;
   }
 
   addObserver(callback: ObserverCallback) {

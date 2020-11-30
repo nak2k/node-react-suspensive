@@ -16,7 +16,7 @@ test('test resolve', t => {
     suspensive.value;
     t.fail();
   } catch (err) {
-    t.equal(err, promise);
+    t.ok(err);
   }
 
   resolve!('ok');
@@ -45,7 +45,7 @@ test('test reject', t => {
     suspensive.value;
     t.fail();
   } catch (err) {
-    t.equal(err, promise);
+    t.ok(err);
   }
 
   reject!('err');
