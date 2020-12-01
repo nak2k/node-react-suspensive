@@ -25,7 +25,7 @@ export const NOT_IN_TRANSITION = Symbol('Not in transition');
  */
 export class Suspensive<T> implements Observable {
   private _get: () => T;
-  private _prev: T | typeof NOT_IN_TRANSITION;
+  private _fallback: T | typeof NOT_IN_TRANSITION;
   private _observers = new Set<ObserverCallback>();
 
   constructor(promise: T | Promise<T> | (() => Promise<T>)) {
@@ -34,7 +34,7 @@ export class Suspensive<T> implements Observable {
   }
 
   private _set(promise: T | Promise<T> | (() => Promise<T>)) {
-    this._prev = this._get();
+    this._fallback = this._get();
 
     if (promise instanceof Promise) {
       const wrapped = this._wrapPromise(promise);
@@ -51,11 +51,11 @@ export class Suspensive<T> implements Observable {
   private _wrapPromise(promise: Promise<T>) {
     return promise.then(
       value => {
-        this._prev = NOT_IN_TRANSITION;
+        this._fallback = NOT_IN_TRANSITION;
         this._get = () => value;
       },
       reason => {
-        this._prev = NOT_IN_TRANSITION;
+        this._fallback = NOT_IN_TRANSITION;
         this._get = () => { throw reason; };
       }
     );
@@ -75,16 +75,16 @@ export class Suspensive<T> implements Observable {
     this._observers.forEach(observer => observer());
   }
 
-  get prev(): T {
-    if (this._prev === NOT_IN_TRANSITION) {
-      throw new Error('The `prev` property can be get only in a transition');
+  get fallback(): T {
+    if (this._fallback === NOT_IN_TRANSITION) {
+      throw new Error('The `fallback` property can be get only in a transition');
     }
 
-    return this._prev;
+    return this._fallback;
   }
 
-  hasPrev() {
-    return this._prev !== NOT_IN_TRANSITION;
+  hasFallback() {
+    return this._fallback !== NOT_IN_TRANSITION;
   }
 
   addObserver(callback: ObserverCallback) {

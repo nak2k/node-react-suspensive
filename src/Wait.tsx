@@ -72,7 +72,7 @@ export function Wait<T>(props: WaitProps<T>) {
 
   useObserver(suspensive);
 
-  const pending = transient && suspensive.hasPrev();
+  const pending = transient && suspensive.hasFallback();
 
   if ('renderAlways' in props) {
     return <Suspense
@@ -90,12 +90,12 @@ export function Wait<T>(props: WaitProps<T>) {
 }
 
 function Render<T>({ suspensive, render, pending }: RenderProps<T>) {
-  return <>{render(pending ? suspensive.prev : suspensive.value, pending)}</>;
+  return <>{render(pending ? suspensive.fallback : suspensive.value, pending)}</>;
 }
 
 function RenderAlways<T>({ waiting, renderAlways, suspensive, pending }: RenderAlwaysProps<T>) {
   return <>{waiting
     ? renderAlways(true, undefined as any as T, pending)
-    : renderAlways(false, pending ? suspensive.prev : suspensive.value, pending)
+    : renderAlways(false, pending ? suspensive.fallback : suspensive.value, pending)
   }</>;
 }
