@@ -9,3 +9,7 @@ export {
   ObserverCallback,
   useObserver,
 } from './Observer';
+export {
+  useLocalSuspensive,
+  useSuspensive,
+} from './useSuspensive';
