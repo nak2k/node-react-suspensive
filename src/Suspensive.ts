@@ -61,11 +61,11 @@ export class Suspensive<T> implements Observable {
     );
   }
 
-  get value() {
+  get value(): T {
     return this._get();
   }
 
-  set value(value: T) {
+  set value(value: T | Promise<T> | (() => Promise<T>)) {
     this.set(value);
   }
 
