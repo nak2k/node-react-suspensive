@@ -91,6 +91,11 @@ export class Suspensive<T> implements Observable {
     return this._fallback !== NOT_IN_TRANSITION;
   }
 
+  clearFallback() {
+    this._fallback = NOT_IN_TRANSITION;
+    this._get = () => NOT_IN_TRANSITION as unknown as T;
+  }
+
   addObserver(callback: ObserverCallback) {
     this._observers.add(callback);
   }
