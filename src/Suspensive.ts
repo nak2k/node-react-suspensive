@@ -72,7 +72,9 @@ export class Suspensive<T> implements Observable {
   set(value: T | Promise<T> | (() => Promise<T>)) {
     this._set(value);
 
-    this._observers.forEach(observer => observer());
+    setTimeout(() => {
+      this._observers.forEach(observer => observer());
+    }, 0);
   }
 
   get fallback(): T {
