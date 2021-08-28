@@ -9,11 +9,12 @@
     "react": "17.0.0",
     "react-dom": "17.0.0",
     "react-scripts": "^3.4.4",
-    "react-suspensive": "^0.1.4"
+    "react-suspensive": "file:../../react-suspensive-0.1.9.tgz"
   },
   "devDependencies": {
     "@types/react": "16.9.19",
     "@types/react-dom": "16.9.5",
+    "npm-install-from-local": "^0.2.2",
     "typescript": "3.7.5"
   },
   "scripts": {
@@ -21,12 +22,17 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "use-local-var": "(cd ../.. && npm pack) && npm uni react-suspensive && npm i ../../react-suspensive-*.tgz"
+    "reinstall": "npm-install-from-local install"
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "npm-install-from-local": {
+    "dependencies": {
+      "react-suspensive": "../.."
+    }
+  }
 }
