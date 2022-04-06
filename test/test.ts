@@ -24,10 +24,10 @@ test('test resolve', t => {
   setImmediate(() => {
     try {
       t.equal(suspensive.value, 'ok');
-    } catch (err) {
+    } catch (err: any) {
       t.fail(err);
     }
-  }, 10);
+  });
 });
 
 test('test reject', t => {
@@ -57,5 +57,5 @@ test('test reject', t => {
     } catch (err) {
       t.equal(err, 'err');
     }
-  }, 10);
+  });
 });
