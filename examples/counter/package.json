@@ -9,7 +9,7 @@
     "react": "17.0.0",
     "react-dom": "17.0.0",
     "react-scripts": "^3.4.4",
-    "react-suspensive": "file:../../react-suspensive-0.1.9.tgz"
+    "react-suspensive": "file:../../react-suspensive-0.1.11.tgz"
   },
   "devDependencies": {
     "@types/react": "16.9.19",
@@ -22,7 +22,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "reinstall": "npm-install-from-local install"
+    "reinstall": "npm-install-from-local install ../.."
   },
   "browserslist": [
     ">0.2%",
