@@ -58,7 +58,13 @@ export function useSuspensive<T>(
     const suspensive = factory();
 
     if (!suspensive.hasFallback() && state.prev) {
-      suspensive.fallback = state.prev.value;
+      try {
+        suspensive.fallback = state.prev.value;
+      } catch {
+        if (state.prev.hasFallback()) {
+          suspensive.fallback = state.prev.fallback;
+        }
+      }
     }
 
     return {
