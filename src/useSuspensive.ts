@@ -1,8 +1,8 @@
-import { useReducer } from 'react';
+import { useReducer, DependencyList } from 'react';
 import { Suspensive } from './Suspensive';
 
 interface LocalSuspensiveState<T> {
-  deps: any[];
+  deps: DependencyList;
   suspensive: Suspensive<T>;
 }
 
@@ -14,9 +14,9 @@ interface LocalSuspensiveState<T> {
  */
 export function useLocalSuspensive<T>(
   factory: () => T | Promise<T> | (() => Promise<T>),
-  deps: any[]
+  deps: DependencyList
 ) {
-  const [state, dispatch] = useReducer((state: LocalSuspensiveState<T>, deps: any[]) => {
+  const [state, dispatch] = useReducer((state: LocalSuspensiveState<T>, deps: DependencyList) => {
     state.suspensive.set(factory());
     return {
       deps,
@@ -35,7 +35,7 @@ export function useLocalSuspensive<T>(
 }
 
 interface SuspensiveState<T> {
-  deps: any[];
+  deps: DependencyList;
   suspensive: Suspensive<T>;
   prev?: Suspensive<T>;
 }
@@ -52,9 +52,9 @@ interface SuspensiveState<T> {
  */
 export function useSuspensive<T>(
   factory: () => Suspensive<T>,
-  deps: any[]
+  deps: DependencyList
 ) {
-  const [state, dispatch] = useReducer((state: SuspensiveState<T>, deps: any[]): SuspensiveState<T> => {
+  const [state, dispatch] = useReducer((state: SuspensiveState<T>, deps: DependencyList): SuspensiveState<T> => {
     const suspensive = factory();
 
     if (!suspensive.hasFallback() && state.prev) {
@@ -78,7 +78,7 @@ export function useSuspensive<T>(
   return state.suspensive;
 }
 
-function areEqual(prevDeps: any[], nextDeps: any[]) {
+function areEqual(prevDeps: DependencyList, nextDeps: DependencyList) {
   if (prevDeps.length !== nextDeps.length) {
     throw new Error('Size of deps must not be changed');
   }
