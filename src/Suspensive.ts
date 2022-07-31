@@ -34,7 +34,15 @@ export class Suspensive<T> implements Observable {
   }
 
   private _set(promise: T | Promise<T> | (() => Promise<T>)) {
-    this._fallback = this._get();
+    try {
+      this._fallback = this._get();
+    } catch (promise: any) {
+      if (promise instanceof Error) {
+        // Ignore if the previous promise is rejected.
+      } else {
+        promise?.cancel();
+      }
+    }
 
     if (promise instanceof Promise) {
       const wrapped = this._wrapPromise(promise);
@@ -49,16 +57,26 @@ export class Suspensive<T> implements Observable {
   }
 
   private _wrapPromise(promise: Promise<T>) {
-    return promise.then(
+    let canceled: boolean;
+
+    const wrappedPromise = promise.then(
       value => {
-        this._fallback = NOT_IN_TRANSITION;
-        this._get = () => value;
+        if (!canceled) {
+          this._fallback = NOT_IN_TRANSITION;
+          this._get = () => value;
+        }
       },
       reason => {
-        this._fallback = NOT_IN_TRANSITION;
-        this._get = () => { throw reason; };
+        if (!canceled) {
+          this._fallback = NOT_IN_TRANSITION;
+          this._get = () => { throw reason; };
+        }
       }
     );
+
+    (wrappedPromise as any).cancel = () => { canceled = true };
+
+    return wrappedPromise;
   }
 
   get value(): T {

@@ -16,7 +16,7 @@ test('test resolve', t => {
     suspensive.value;
     t.fail();
   } catch (err) {
-    t.ok(err);
+    t.ok(err instanceof Promise);
   }
 
   resolve!('ok');
@@ -57,5 +57,59 @@ test('test reject', t => {
     } catch (err) {
       t.equal(err, 'err');
     }
+  });
+});
+
+test('Cancel previous promise', t => {
+  t.plan(4);
+
+  let resolve1st: (value: string) => void;
+
+  const promise1st = new Promise<string>((_resolve, _reject) => {
+    resolve1st = _resolve;
+  });
+
+  const suspensive = new Suspensive(promise1st);
+
+  try {
+    suspensive.value;
+    t.fail();
+  } catch (err) {
+    t.ok(err instanceof Promise);
+  }
+
+  let resolve2nd: (value: string) => void;
+
+  const promise2nd = new Promise<string>((_resolve, _reject) => {
+    resolve2nd = _resolve;
+  });
+
+  suspensive.value = promise2nd;
+
+  try {
+    suspensive.value;
+    t.fail();
+  } catch (err) {
+    t.ok(err instanceof Promise);
+  }
+
+  resolve2nd!('2nd');
+
+  setImmediate(() => {
+    try {
+      t.equal(suspensive.value, '2nd');
+    } catch (err: any) {
+      t.fail(err);
+    }
+
+    resolve1st!('1st');
+
+    setImmediate(() => {
+      try {
+        t.equal(suspensive.value, '2nd');
+      } catch (err: any) {
+        t.fail(err);
+      }
+    });
   });
 });
